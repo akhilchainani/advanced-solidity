@@ -16,7 +16,7 @@ contract UntrustedEscrow {
 
     mapping(uint256 => Escrow) private escrows;
     uint256 private escrowCount;
-    
+
     event EscrowCreated(uint256 id, address buyer, address seller, IERC20 token, uint256 amount);
     event EscrowRedeemed(uint256 id, address buyer, address seller, IERC20 token, uint256 amount, bool isFullyRedeemed);
 
@@ -68,5 +68,6 @@ contract UntrustedEscrow {
 
         // mark the escrow as fully redeemed
         escrow.isFullyRedeemed = true;
+        emit EscrowRedeemed(escrowId, escrow.buyer, escrow.seller, escrow.token, escrow.amount, escrow.isFullyRedeemed);
     }
 }
