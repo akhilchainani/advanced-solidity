@@ -6,7 +6,7 @@ contract UntrustedEscrow {
     uint256 public constant ESCROW_DURATION = 3 days;
 
     struct Escrow {
-        uint256 withdrawableBlockNumber;
+        uint256 withdrawableTimestamp;
         address buyer;
         address seller;
         IERC20 token;
@@ -27,13 +27,13 @@ contract UntrustedEscrow {
     /**
      * @dev Deposit tokens into the escrow.
      */
-    function depositInEscrow(address seller, IERC20 token, uint256 amount) public {
+    function depositInEscrow(address seller, IERC20 token, uint256 amount) public returns (uint256) {
         // transfer the tokens to the contract
         token.transferFrom(msg.sender, address(this), amount);
 
         // create the escrow
         Escrow memory escrow = Escrow({
-            withdrawableBlockNumber: block.number + ESCROW_DURATION,
+            withdrawableTimestamp: block.timestamp + ESCROW_DURATION,
             buyer: msg.sender,
             seller: seller,
             token: token,
@@ -48,6 +48,9 @@ contract UntrustedEscrow {
 
         // increment escrowCount
         escrowCount += 1;
+
+        // return the escrow id
+        return escrowCount - 1;
     }
 
     /**
@@ -61,7 +64,7 @@ contract UntrustedEscrow {
         require(!escrow.isFullyRedeemed, "Escrow is fully redeemed");
 
         // check if the withdrawable block number has passed
-        require(block.number >= escrow.withdrawableBlockNumber, "Escrow is not yet withdrawable");
+        require(block.timestamp >= escrow.withdrawableTimestamp, "Escrow is not yet withdrawable");
 
         // transfer the tokens to the seller
         escrow.token.transfer(escrow.seller, escrow.amount);
