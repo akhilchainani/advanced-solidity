@@ -18,7 +18,7 @@ contract UntrustedEscrowTest is Test {
         token.transfer(buyer, 250_000);
         token.transfer(seller, 750_000);
     }
-    
+
     function test_deposit_and_withdraw_success() public {
         assertEq(token.balanceOf(buyer), 250_000);
         assertEq(token.balanceOf(seller), 750_000);

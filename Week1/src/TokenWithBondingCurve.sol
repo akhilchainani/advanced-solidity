@@ -63,7 +63,7 @@ contract TokenWithBondingCurve is ERC20 {
         require(address(this).balance >= totalPayment, "Insufficient funds in the contract");
 
         // Transfer the ether to the sender
-        (bool success, ) = msg.sender.call{value: totalPayment}("");
+        (bool success,) = msg.sender.call{value: totalPayment}("");
         require(success, "Transfer failed.");
 
         // Update the last interacted block for the sender
