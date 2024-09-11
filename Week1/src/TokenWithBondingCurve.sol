@@ -28,10 +28,8 @@ contract TokenWithBondingCurve is ERC20 {
 
         // Calculate the total cost of the tokens
         uint256 currentPrice = getCurrentPrice();
-        uint256 totalCost = 0;
-        for (uint256 i = 0; i < value; i++) {
-            totalCost += currentPrice + PRICE_INCREMENT * i;
-        }
+        uint256 totalCost = currentPrice * value;
+        totalCost += PRICE_INCREMENT * (value * (value - 1)) / 2;
 
         // Verify that the sender has sent enough ether
         require(msg.value >= totalCost, "Insufficient funds");
@@ -54,10 +52,8 @@ contract TokenWithBondingCurve is ERC20 {
         // Note: The current price to sell it is the last price the contract bought it for
         // which is the current price minus the price increment
         uint256 currentPrice = getCurrentPrice() - PRICE_INCREMENT;
-        uint256 totalPayment = 0;
-        for (uint256 i = 0; i < value; i++) {
-            totalPayment += currentPrice - PRICE_INCREMENT * i;
-        }
+        uint256 totalPayment = currentPrice * value;
+        totalPayment -= PRICE_INCREMENT * (value * (value - 1)) / 2;
 
         // Verify that the contract has enough funds to pay the sender
         require(address(this).balance >= totalPayment, "Insufficient funds in the contract");
