@@ -1,6 +1,6 @@
 pragma solidity ^0.8.26;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract UntrustedEscrow {
     uint256 public constant ESCROW_DURATION = 3 days;
@@ -28,9 +28,6 @@ contract UntrustedEscrow {
      * @dev Deposit tokens into the escrow.
      */
     function depositInEscrow(address seller, IERC20 token, uint256 amount) public returns (uint256) {
-        // transfer the tokens to the contract
-        token.transferFrom(msg.sender, address(this), amount);
-
         // create the escrow
         Escrow memory escrow = Escrow({
             withdrawableTimestamp: block.timestamp + ESCROW_DURATION,
@@ -49,6 +46,9 @@ contract UntrustedEscrow {
         // increment escrowCount
         escrowCount += 1;
 
+        // transfer the tokens to the contract
+        SafeERC20.safeTransferFrom(token, msg.sender, address(this), amount);
+
         // return the escrow id
         return escrowCount - 1;
     }
@@ -66,11 +66,11 @@ contract UntrustedEscrow {
         // check if the withdrawable block number has passed
         require(block.timestamp >= escrow.withdrawableTimestamp, "Escrow is not yet withdrawable");
 
-        // transfer the tokens to the seller
-        escrow.token.transfer(escrow.seller, escrow.amount);
-
         // mark the escrow as fully redeemed
         escrow.isFullyRedeemed = true;
         emit EscrowRedeemed(escrowId, escrow.buyer, escrow.seller, escrow.token, escrow.amount, escrow.isFullyRedeemed);
+
+        // transfer the tokens to the seller
+        SafeERC20.safeTransfer(escrow.token, escrow.seller, escrow.amount);
     }
 }
